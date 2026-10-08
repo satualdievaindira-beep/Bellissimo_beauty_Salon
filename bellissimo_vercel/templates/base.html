@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}Салон красоты в Бишкеке{% endblock %} | {{ site_name }}</title>
+  <meta name="description" content="{{ salon_name }} в Бишкеке: стрижки, окрашивание, уход за волосами, брови, маникюр, педикюр и лазерная эпиляция. Запись в WhatsApp.">
+  <meta name="theme-color" content="#0B1426">
+  <meta property="og:title" content="{{ salon_name }}">
+  <meta property="og:image" content="{{ logo_url }}">
+  <link rel="icon" href="{{ logo_url }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<a class="skip" href="#main">К содержимому</a>
+
+<header class="site-header">
+  <a class="brand" href="{{ url_for('index') }}" aria-label="{{ salon_name }}">
+    <img src="{{ logo_url }}" alt="" width="44" height="44">
+    <span class="brand-text">Bellissimo<small>Beauty Salon</small></span>
+  </a>
+  <nav id="nav" class="nav" aria-label="Меню">
+    <a href="{{ url_for('index') }}#services">Услуги</a>
+    <a href="{{ url_for('index') }}#booking">Запись</a>
+    <a href="{{ url_for('index') }}#contacts">Контакты</a>
+    <a class="btn small wa" href="{{ wa_link }}" target="_blank" rel="noopener">WhatsApp</a>
+  </nav>
+  <button class="nav-toggle" aria-expanded="false" aria-controls="nav" aria-label="Открыть меню"><span></span><span></span><span></span></button>
+</header>
+
+<main id="main">
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <p><strong>{{ site_name }}</strong> · {{ salon_name }}, {{ city }}</p>
+  <p class="muted">&copy; {{ salon_name }}</p>
+</footer>
+
+<div class="action-bar">
+  <a class="ab wa" href="{{ wa_link }}" target="_blank" rel="noopener">WhatsApp</a>
+  <a class="ab primary" href="{{ url_for('index') }}#booking">Записаться</a>
+</div>
+<script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+</body>
+</html>

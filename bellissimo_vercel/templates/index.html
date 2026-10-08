@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="hero">
+  <div class="hero-copy">
+    <p class="eyebrow">{{ city }} · салон красоты</p>
+    <h1>Красота, в которой вы уверены</h1>
+    <p class="lead">Стрижки, окрашивание, уход за волосами, брови, маникюр и лазерная эпиляция. Выберите услугу, дату и время, и мы продолжим в WhatsApp.</p>
+    <div class="actions">
+      <a class="btn" href="#booking">Записаться</a>
+      <a class="btn ghost" href="{{ map_url }}" target="_blank" rel="noopener">Мы на карте 2ГИС</a>
+    </div>
+    <ul class="tags">
+      <li>Стрижки и окрашивание</li>
+      <li>Маникюр и педикюр</li>
+      <li>Лазерная эпиляция</li>
+    </ul>
+  </div>
+  <div class="hero-banner">
+    <div class="glow"></div>
+    <img src="{{ logo_url }}" alt="{{ salon_name }}" width="460" height="460">
+  </div>
+</section>
+
+<section class="section" id="services">
+  <div class="section-head">
+    <h2>Услуги и цены</h2>
+    <p class="lead">Цены в сомах. Выберите направление или смотрите всё сразу.</p>
+  </div>
+  <nav class="chips" aria-label="Направления">
+    <button type="button" class="chip active" data-filter="all">Все</button>
+    {% for cat in categories %}<button type="button" class="chip" data-filter="{{ cat.key }}">{{ cat.title }}</button>{% endfor %}
+  </nav>
+
+  {% for cat in categories %}
+  <section class="price-block" data-cat="{{ cat.key }}">
+    <header>
+      <span class="num">{{ '%02d' % loop.index }}</span>
+      <div><h3>{{ cat.title }}</h3><p class="muted">{{ cat.text }}</p></div>
+    </header>
+    <ul class="price-list {{ 'two-col' if cat['items'] | length > 8 }}">
+      {% set cat_key = cat.key %}
+      {% for name, price, note in cat['items'] %}
+      <li>
+        <div class="item-main">
+          <span class="item-name">{{ name }}</span>
+          {% if note %}<span class="item-note">{{ note }}</span>{% endif %}
+        </div>
+        <span class="item-price {{ '' if price else 'ask' }}">{{ price or 'Уточняйте цену' }}</span>
+        <a class="pick" href="{{ url_for('index', service=cat_key ~ '-' ~ loop.index0) }}#booking" data-service="{{ cat_key }}-{{ loop.index0 }}" aria-label="Записаться: {{ name }}">Записаться</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endfor %}
+</section>
+
+<section class="section booking" id="booking">
+  <div class="booking-grid">
+    <div>
+      <h2>Запись в WhatsApp</h2>
+      <ol class="steps">
+        <li><strong>Выберите</strong> услугу, дату и удобное время.</li>
+        <li><strong>Нажмите</strong> «Записаться в WhatsApp»: откроется чат с администратором.</li>
+        <li><strong>Отправьте</strong> готовое сообщение. Администратор подтвердит запись.</li>
+      </ol>
+      <div class="preview" aria-live="polite">
+        <p class="muted">Так будет выглядеть ваше сообщение</p>
+        <pre id="preview">Выберите услугу, дату и время.</pre>
+      </div>
+    </div>
+
+    <form method="post" action="{{ url_for('book') }}" id="booking-form" class="form" data-salon="{{ salon_name }}" novalidate>
+      {% if errors %}<div class="errors" role="alert">{% for e in errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+      <label>Услуга
+        <select name="service" id="service" required>
+          <option value="">Выберите услугу</option>
+          {% for cat in categories %}
+          <optgroup label="{{ cat.title }}">
+            {% for name, price, note in cat['items'] %}
+            {% set sid = cat.key ~ '-' ~ loop.index0 %}
+            <option value="{{ sid }}" data-name="{{ name }}" data-price="{{ price or '' }}" {{ 'selected' if form.service == sid }}>{{ name }}{% if price %} · {{ price }}{% endif %}</option>
+            {% endfor %}
+          </optgroup>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="row">
+        <label>Дата
+          <input type="date" name="day" id="day" value="{{ form.day }}" min="{{ min_day }}" max="{{ max_day }}" required>
+        </label>
+        <label>Время
+          <select name="time" id="time" required>
+            <option value="">Выберите время</option>
+            {% for t in times %}<option value="{{ t }}" {{ 'selected' if form.time == t }}>{{ t }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
+      <label>Ваше имя <span class="muted">(по желанию)</span>
+        <input name="name" id="name" value="{{ form.name }}" maxlength="60" autocomplete="name">
+      </label>
+      <label>Комментарий <span class="muted">(по желанию)</span>
+        <textarea name="comment" id="comment" rows="2" maxlength="200" placeholder="Например: хочу светлый оттенок">{{ form.comment }}</textarea>
+      </label>
+      <button class="btn wa full" type="submit">Записаться в WhatsApp</button>
+      <p class="muted small-print">После нажатия откроется WhatsApp с готовым сообщением. Запись считается подтверждённой, когда ответит администратор.</p>
+    </form>
+  </div>
+</section>
+
+<section class="section narrow" id="faq">
+  <h2>Частые вопросы</h2>
+  <div class="faq">
+    <details>
+      <summary>Как записаться?</summary>
+      <p>Выберите услугу, дату и время в форме выше и нажмите «Записаться в WhatsApp». Откроется чат с администратором и готовым сообщением, останется только отправить его.</p>
+    </details>
+    <details>
+      <summary>Что значит «Уточняйте цену»?</summary>
+      <p>Для некоторых услуг цена зависит от длины и состояния волос или от объёма работы. Напишите администратору в WhatsApp, и он назовёт точную стоимость.</p>
+    </details>
+    <details>
+      <summary>Как перенести или отменить запись?</summary>
+      <p>Напишите администратору в WhatsApp на номер {{ wa_display }}: укажите имя, дату и время записи.</p>
+    </details>
+    <details>
+      <summary>Выбранное время занято. Что делать?</summary>
+      <p>Напишите администратору, он подскажет свободное время. Сообщение из формы запись не фиксирует: её подтверждает администратор.</p>
+    </details>
+    <details>
+      <summary>Где вы находитесь?</summary>
+      <p>Нажмите «Мы на карте 2ГИС» или «Открыть в 2ГИС»: там точка салона и маршрут.</p>
+    </details>
+  </div>
+</section>
+
+<section class="section" id="contacts">
+  <h2>Как нас найти</h2>
+  <div class="contact-grid">
+    <article class="card">
+      <h3>Мы на карте</h3>
+      <p class="muted">{{ salon_name }}, {{ city }}. Откройте точку в 2ГИС: там маршрут от вас до салона.</p>
+      <a class="btn" href="{{ map_url }}" target="_blank" rel="noopener">Открыть в 2ГИС</a>
+    </article>
+    <article class="card">
+      <h3>WhatsApp администратора</h3>
+      <p class="phone"><a href="{{ tel_link }}">{{ wa_display }}</a></p>
+      <p class="muted">Пишите по любым вопросам: свободное время, стоимость, подготовка к процедуре.</p>
+      <a class="btn wa" href="{{ wa_link }}" target="_blank" rel="noopener">Написать в WhatsApp</a>
+    </article>
+  </div>
+</section>
+{% endblock %}
